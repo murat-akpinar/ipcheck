@@ -1,21 +1,19 @@
 #!/bin/bash
 
-# Check if nmap and fping are installed
+
 if ! command -v nmap &> /dev/null || ! command -v fping &> /dev/null; then
   echo "This script requires nmap and fping to be installed. Please install these packages and try again."
   exit 1
 fi
 
-# Define the network address and subnet mask for your site
 NETWORK="192.168.1.0/24"
 
-# Generate a list of all possible IP addresses on your site
+
 IP_LIST=$(for i in {1..254}; do echo "${NETWORK%.*}.$i"; done)
 
-# Use nmap to scan for active hosts on your site
+
 ACTIVE_HOSTS=$(sudo nmap -sn $NETWORK | grep "is up" | cut -d " " -f 2)
 
-# Check each IP address to see if it is in use
 IN_USE=()
 TOTAL_IPS=$(echo $IP_LIST | wc -w)
 for ((i=1; i<=$TOTAL_IPS; i++)); do
@@ -28,7 +26,7 @@ for ((i=1; i<=$TOTAL_IPS; i++)); do
 done
 echo -ne "\n"
 
-# Compare the two lists to find free IP addresses
+
 FREE_IPS=$(comm -23 <(echo "$IP_LIST" | sort) <(echo "$ACTIVE_HOSTS ${IN_USE[@]}" | tr ' ' '\n' | sort))
 
 # Write the results to a log file with the current date
